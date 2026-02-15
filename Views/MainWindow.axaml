@@ -1,0 +1,62 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Velvest.Views.MainWindow"
+        Title="Velvest" Width="1150" Height="850" Background="#1C1C1C">
+
+    <Grid ColumnDefinitions="*, 300" RowDefinitions="Auto, 150, Auto, Auto, *, 150, Auto" Margin="20">
+        
+        <TextBlock Grid.Row="0" Grid.ColumnSpan="2" Text="Velvest // NETWORK ANALYZER" 
+                   FontSize="18" Foreground="#F64A8A" HorizontalAlignment="Left" 
+                   FontFamily="Monospace" Margin="0,0,0,15" Opacity="0.8"/>
+        
+        <ListBox Grid.Row="1" Grid.ColumnSpan="2" x:Name="InterfaceList" 
+                 Background="#252525" Foreground="#F64A8A" 
+                 BorderBrush="#F64A8A" BorderThickness="1"/>
+        
+        <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Orientation="Horizontal" 
+                    HorizontalAlignment="Center" Spacing="40" Margin="0,15,0,0">
+            <StackPanel>
+                <TextBlock Text="PACKETS" Foreground="#F64A8A" Opacity="0.5" FontSize="10" HorizontalAlignment="Center"/>
+                <TextBlock x:Name="TotalPacketsText" Text="0" Foreground="#FFD700" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center"/>
+            </StackPanel>
+            <StackPanel>
+                <TextBlock Text="TCP" Foreground="#F64A8A" Opacity="0.5" FontSize="10" HorizontalAlignment="Center"/>
+                <TextBlock x:Name="TcpCountText" Text="0" Foreground="#FFD700" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center"/>
+            </StackPanel>
+            <StackPanel>
+                <TextBlock Text="UDP" Foreground="#F64A8A" Opacity="0.5" FontSize="10" HorizontalAlignment="Center"/>
+                <TextBlock x:Name="UdpCountText" Text="0" Foreground="#FFD700" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center"/>
+            </StackPanel>
+        </StackPanel>
+
+        <Separator Grid.Row="3" Grid.ColumnSpan="2" Margin="0,10" Background="#F64A8A" Height="1" Opacity="0.3"/>
+        <TextBox Grid.Row="3" Grid.ColumnSpan="2" x:Name="FilterInput" Watermark="filter by ip or protocol..." 
+                 Margin="0,25,0,0" Background="#252525" Foreground="#F64A8A" BorderBrush="#F64A8A"/>
+
+        <ListBox Grid.Row="4" Grid.Column="0" x:Name="PacketLog" Margin="0,15,15,0" 
+                 Background="#151515" Foreground="#F64A8A" BorderBrush="#F64A8A" 
+                 BorderThickness="1" FontFamily="Monospace" FontSize="12"
+                 SelectionChanged="OnPacketSelected"/> 
+        
+        <StackPanel Grid.Row="4" Grid.Column="1" Margin="0,15,0,0">
+            <TextBlock Text="TOP SOURCES" Foreground="#F64A8A" FontWeight="Bold" Margin="0,0,0,10"/>
+            <ListBox x:Name="TopSourcesList" Height="300" Background="#252525" Foreground="#F64A8A" 
+                     BorderBrush="#F64A8A" BorderThickness="1" FontSize="11"/>
+        </StackPanel>
+
+        <Border Grid.Row="5" Grid.ColumnSpan="2" Margin="0,15,0,0" Background="#111111" BorderBrush="#FFD700" BorderThickness="1">
+            <ScrollViewer>
+                <TextBlock x:Name="DetailsText" Text="select a packet for detailed analysis..." 
+                           Margin="10" Foreground="#FFD700" FontFamily="Monospace" FontSize="11" TextWrapping="Wrap"/>
+            </ScrollViewer>
+        </Border>
+
+        <StackPanel Grid.Row="6" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="15" Margin="0,15,0,0">
+            <Button Content="SCAN" Click="OnScanClick" Background="#F64A8A" Foreground="Black" Padding="20,7" FontWeight="Bold"/>
+            <Button Content="START" Click="OnStartCaptureClick" Background="#F64A8A" Foreground="Black" Padding="20,7" FontWeight="Bold"/>
+            <Button Content="STOP" Click="OnStopCaptureClick" Background="#333333" Foreground="#F64A8A" Padding="20,7" BorderBrush="#F64A8A" BorderThickness="1"/>
+            <Button Content="CLEAR" Click="OnClearLogClick" Background="#333333" Foreground="#F64A8A" Padding="20,7"/>
+            <TextBlock x:Name="StatusText" Text="READY" Foreground="#F64A8A" VerticalAlignment="Center" Opacity="0.6"/>
+        </StackPanel>
+    </Grid>
+</Window>
