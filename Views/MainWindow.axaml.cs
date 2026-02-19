@@ -60,7 +60,7 @@ public partial class MainWindow : Window
         _ipStats.Clear();
         _packetDetailsStorage.Clear();
         _totalPackets = 0; _tcpCount = 0; _udpCount = 0;
-        DetailsText.Text = "select a packet for detailed analysis...";
+        DetailsText.Text = "select a packet to inspect";
         UpdateStatsDisplay();
     }
 
@@ -83,9 +83,11 @@ public partial class MainWindow : Window
         if (ip != null)
         {
             _totalPackets++;
+            // фиксация номера пакета сразу, чтобы асинхронность его не сбила
+            int currentNum = _totalPackets;
+
             string srcIp = ip.SourceAddress.ToString();
             
-            // учет активности отправителя
             if (_ipStats.ContainsKey(srcIp)) _ipStats[srcIp]++;
             else _ipStats[srcIp] = 1;
 
@@ -94,50 +96,49 @@ public partial class MainWindow : Window
             if (tcp != null) _tcpCount++;
             if (udp != null) _udpCount++;
 
-            // правила
-            string alertMessage = "";
-            bool isSuspicious = false;
+            string alert = "";
+            bool suspicious = false;
 
-            // проверка на обращение к опасным портам
             if (tcp != null && _suspiciousPorts.Contains(tcp.DestinationPort))
             {
-                alertMessage = "[!] ALERT: SUSPICIOUS PORT ACCESS ";
-                isSuspicious = true;
+                alert = "[!] ";
+                suspicious = true;
             }
 
-            // проверка на странный ttl
             if (ip.TimeToLive < 10)
             {
-                alertMessage += "[!] ALERT: UNUSUAL TTL VALUE ";
-                isSuspicious = true;
+                alert = "[!] ";
+                suspicious = true;
             }
 
-            // работа с чексуммой, только для ipv4
-            string checksum = "n/a";
-            if (ip is IPv4Packet ipv4) checksum = "0x" + ipv4.Checksum.ToString("X");
+            string chksum = "n/a";
+            if (ip is IPv4Packet ipv4) chksum = "0x" + ipv4.Checksum.ToString("X");
 
-            // формирование расширенных деталей
-            string details = $"[ ANALYSIS REPORT ]\n" +
-                             $"status: {(isSuspicious ? "WARNING / ANOMALY DETECTED" : "NORMAL")}\n" +
+            // отчет для нижней панели
+            string details = $"[ packet #{currentNum} ]\n" +
+                             $"status: {(suspicious ? "warning / anomaly detected" : "normal")}\n" +
                              $"timestamp: {DateTime.Now:HH:mm:ss.fff}\n" +
                              $"protocol: {ip.Protocol}\n" +
                              $"source: {ip.SourceAddress}\n" +
                              $"destination: {ip.DestinationAddress}\n" +
                              $"payload size: {raw.Data.Length} bytes\n" +
                              $"ttl: {ip.TimeToLive}\n" +
-                             $"checksum: {checksum}";
+                             $"checksum: {chksum}";
 
             Dispatcher.UIThread.InvokeAsync(() =>
             {
-                // лог теперь может содержать пометку об аномалии
-                string entry = $"{alertMessage}[{DateTime.Now:HH:mm:ss}] {ip.Protocol}: {srcIp} -> {ip.DestinationAddress}";
+                // форматир строку для главного лога
+                string idStr = $"#{currentNum}".PadRight(7);
+                string timeStr = $"[{DateTime.Now:HH:mm:ss}]".PadRight(12);
+                string entry = $"{idStr} {timeStr} {alert}{ip.Protocol}: {srcIp} -> {ip.DestinationAddress}";
                 
-                // применение фильтра поиска
+                // фильтр поиска
                 if (string.IsNullOrEmpty(FilterInput.Text) || entry.Contains(FilterInput.Text, StringComparison.OrdinalIgnoreCase))
                 {
                     PacketLog.Items.Add(entry);
                     _packetDetailsStorage.Add(details);
 
+                    // лог в пределах 100 записей(пока что), чтобы не тормозило
                     if (PacketLog.Items.Count > 100) 
                     {
                         PacketLog.Items.RemoveAt(0);
